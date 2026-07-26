@@ -3,7 +3,7 @@ from flask import Flask
 from flask_migrate import Migrate
 
 # Import database and models
-from models import *
+from server.models import *
 
 # Create Flask app
 app = Flask(__name__)
