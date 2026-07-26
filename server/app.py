@@ -1,5 +1,5 @@
 # Import Flask utilities
-from flask import Flask, jsonify, requests
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
 # Import database and models
