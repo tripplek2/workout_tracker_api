@@ -2,7 +2,8 @@
 from flask_sqlalchemy import SQLAlchemy
 
 # Import model validator
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 
 # Create database instance
 db = SQLAlchemy()
@@ -24,6 +25,16 @@ class Exercise(db.Model):
     # Equipment required
     equipment_needed = db.Column(db.Boolean, nullable=False)
 
+    # Relationship to join table
+    workout_exercises = relationship(
+        "WorkoutExercise",
+        back_populates="exercise",
+        cascade="all, delete-orphan"
+    )
+
+    # Access related workouts
+    workouts = association_proxy("workout_exercises", "workout")
+
 
 # Workout model
 class Workout(db.Model):
@@ -40,6 +51,16 @@ class Workout(db.Model):
 
     # Workout notes
     notes = db.Column(db.Text)
+
+    # Relationship to join table
+    workout_exercises = relationship(
+        "WorkoutExercise",
+        back_populates="workout",
+        cascade="all, delete-orphan"
+    )
+
+    # Access related exercises
+    exercises = association_proxy("workout_exercises", "exercise")
 
 
 # Join table
@@ -71,3 +92,15 @@ class WorkoutExercise(db.Model):
 
     # Duration in seconds
     duration_seconds = db.Column(db.Integer)
+
+    # Relationship to Workout
+    workout = relationship(
+        "Workout",
+        back_populates="workout_exercises"
+    )
+
+    # Relationship to Exercise
+    exercise = relationship(
+        "Exercise",
+        back_populates="workout_exercises"
+    )
