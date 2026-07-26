@@ -17,10 +17,10 @@ class Exercise(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # Exercise name
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
 
     # Exercise category
-    category = db.Column(db.String, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
 
     # Equipment required
     equipment_needed = db.Column(db.Boolean, nullable=False)
@@ -35,10 +35,38 @@ class Exercise(db.Model):
     # Access related workouts
     workouts = association_proxy("workout_exercises", "workout")
 
+    @validates("name")
+    def validate_name(self, key, value):
+        """Ensure exercise name is valid."""
+
+        if not value:
+            raise ValueError("Exercise name is required.")
+
+        if len(value.strip()) < 3:
+            raise ValueError("Exercise name must have at least 3 characters.")
+
+        return value.title()
+
+    @validates("category")
+    def validate_category(self, key, value):
+        """Ensure category is valid."""
+
+        if not value:
+            raise ValueError("Category is required.")
+
+        return value.title()
+
 
 # Workout model
 class Workout(db.Model):
     __tablename__ = "workouts"
+
+    __table_args__ = (
+    db.CheckConstraint(
+        "duration_minutes > 0",
+        name="check_duration_positive"
+    ),
+)
 
     # Primary key
     id = db.Column(db.Integer, primary_key=True)
@@ -62,10 +90,38 @@ class Workout(db.Model):
     # Access related exercises
     exercises = association_proxy("workout_exercises", "exercise")
 
+    @validates("duration_minutes")
+    def validate_duration(self, key, value):
+        """Ensure workout duration is positive."""
+
+        if value <= 0:
+            raise ValueError("Duration must be greater than zero.")
+
+        return value
+
 
 # Join table
 class WorkoutExercise(db.Model):
     __tablename__ = "workout_exercises"
+
+    __table_args__ = (
+
+    db.CheckConstraint(
+        "reps >= 0",
+        name="check_reps_positive"
+    ),
+
+    db.CheckConstraint(
+        "sets >= 0",
+        name="check_sets_positive"
+    ),
+
+    db.CheckConstraint(
+        "duration_seconds >= 0",
+        name="check_duration_seconds_positive"
+    ),
+
+)
 
     # Primary key
     id = db.Column(db.Integer, primary_key=True)
@@ -104,3 +160,30 @@ class WorkoutExercise(db.Model):
         "Exercise",
         back_populates="workout_exercises"
     )
+
+    @validates("reps")
+    def validate_reps(self, key, value):
+        """Ensure reps are valid."""
+
+        if value is not None and value < 0:
+            raise ValueError("Reps cannot be negative.")
+
+        return value
+
+    @validates("sets")
+    def validate_sets(self, key, value):
+        """Ensure sets are valid."""
+
+        if value is not None and value < 0:
+            raise ValueError("Sets cannot be negative.")
+
+        return value
+
+    @validates("duration_seconds")
+    def validate_duration_seconds(self, key, value):
+        """Ensure duration is valid."""
+
+        if value is not None and value < 0:
+            raise ValueError("Duration cannot be negative.")
+
+        return value
