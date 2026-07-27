@@ -1,8 +1,12 @@
 # Import Marshmallow
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 
 # Exercise Schema
 class ExerciseSchema(Schema):
+
+    class Meta:
+        unknown = EXCLUDE
+
     # Exercise ID
     id = fields.Int(dump_only=True)
 
@@ -15,22 +19,77 @@ class ExerciseSchema(Schema):
     # Equipment required
     equipment_needed = fields.Bool(required=True)
 
-    # WorkoutExercise Schema
+    # Validate exercise name
+    @validates("name")
+    def validate_name(self, value):
+
+        if len(value.strip()) < 3:
+            raise ValidationError(
+                "Exercise name must have at least 3 characters."
+            )
+
+    # Validate category
+    @validates("category")
+    def validate_category(self, value):
+
+        if not value.strip():
+            raise ValidationError(
+                "Category is required."
+            )
+
+# WorkoutExercise Schema
+
 class WorkoutExerciseSchema(Schema):
+
+    class Meta:
+        unknown = EXCLUDE
+
     #Join table ID 
     id = fields.Int(dump_only=True)
 
     # Foreign keys
-    workout_id = fields.Int()
-    exercise_id = fields.Int()
+    workout_id = fields.Int(dump_only=True)
+    exercise_id = fields.Int(dump_only=True)
 
     # Workout details
     reps = fields.Int(allow_none=True)
     sets = fields.Int(allow_none=True)
     duration_seconds = fields.Int(allow_none=True)
 
-    # Workout Schema
+    # Validate reps
+    @validates("reps")
+    def validate_reps(self, value):
+
+        if value is not None and value < 0:
+            raise ValidationError(
+                "Reps cannot be negative."
+            )
+
+    # Validate sets
+    @validates("sets")
+    def validate_sets(self, value):
+
+        if value is not None and value < 0:
+            raise ValidationError(
+                "Sets cannot be negative."
+            )
+
+    # Validate duration
+    @validates("duration_seconds")
+    def validate_duration_seconds(self, value):
+
+        if value is not None and value < 0:
+            raise ValidationError(
+                "Duration cannot be negative."
+            )
+
+# Workout Schema
+
 class WorkoutSchema(Schema):
+
+    class Meta:
+        unknown = EXCLUDE
+
     # Workout ID
     id = fields.Int(dump_only=True)
 
@@ -46,7 +105,17 @@ class WorkoutSchema(Schema):
         dump_only=True
     )
 
+    # Validate workout duration
+    @validates("duration_minutes")
+    def validate_duration(self, value):
+
+        if value <= 0:
+            raise ValidationError(
+                "Duration must be greater than zero."
+            )
+
 # Exercise schemas
+
 exercise_schema = ExerciseSchema()
 exercises_schema = ExerciseSchema(many=True)
 
