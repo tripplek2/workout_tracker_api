@@ -1,1 +1,15 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
 venv/
+
+# Database
+*.db
+
+# Flask instance
+instance/
+
+# Migrations cache
+migrations/**/__pycache__/

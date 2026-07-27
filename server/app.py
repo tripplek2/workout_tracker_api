@@ -2,6 +2,7 @@
 from flask import Flask, request
 from flask_migrate import Migrate
 from marshmallow import ValidationError
+from pathlib import Path
 
 # Import database and models
 from server.models import db, Exercise, Workout, WorkoutExercise
@@ -19,12 +20,23 @@ from server.schemas import (
 # Create Flask app
 app = Flask(__name__)
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "app.db"
+
 # Configure database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Connect database
 db.init_app(app)
+
+from pathlib import Path
+
+with app.app_context():
+    print("DB URI:", db.engine.url)
+    print("App root:", app.root_path)
+    print("Instance path:", app.instance_path)
+    print("This file:", Path(__file__).resolve())
 
 # Enable migrations
 migrate = Migrate(app, db)
