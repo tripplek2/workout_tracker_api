@@ -30,14 +30,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Connect database
 db.init_app(app)
 
-from pathlib import Path
-
-with app.app_context():
-    print("DB URI:", db.engine.url)
-    print("App root:", app.root_path)
-    print("Instance path:", app.instance_path)
-    print("This file:", Path(__file__).resolve())
-
 # Enable migrations
 migrate = Migrate(app, db)
 
@@ -155,7 +147,7 @@ def create_exercise():
 # Delete exercise
 @app.delete("/exercises/<int:id>")
 def delete_exercise(id):
-    exercise = Exercise.query.get(id)
+    exercise = db.session.get(Exercise, id)
 
     if not exercise:
         return {"error": "Exercise not found"}, 404
