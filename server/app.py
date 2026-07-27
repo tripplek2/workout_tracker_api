@@ -99,7 +99,7 @@ def create_workout():
 # Delete workout
 @app.delete("/workouts/<int:id>")
 def delete_workout(id):
-    workout = Workout.query.get(id)
+    workout = db.session.get(Workout, id)
 
     if not workout:
         return {"error": "Workout not found"}, 404
@@ -121,7 +121,7 @@ def get_exercises():
 # Get one exercise
 @app.get("/exercises/<int:id>")
 def get_exercise(id):
-    exercise = Exercise.query.get(id)
+    exercise = db.session.get(Exercise, id)
 
     if not exercise:
         return {"error": "Exercise not found"}, 404
@@ -169,12 +169,12 @@ def delete_exercise(id):
 # Add exercise to workout
 @app.post("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises")
 def add_exercise_to_workout(workout_id, exercise_id):
-    workout = Workout.query.get(workout_id)
+    workout = db.session.get(Workout, workout_id)
 
     if workout is None:
         return {"error":"Workout not found"},404
 
-    exercise = Exercise.query.get(exercise_id)
+    exercise = db.session.get(Exercise, exercise_id)
 
     if exercise is None:
         return {"error":"Exercise not found"},404
